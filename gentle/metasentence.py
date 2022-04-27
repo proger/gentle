@@ -18,6 +18,8 @@ def kaldi_normalize(word, vocab):
     norm = word.lower()
     # Turn fancy apostrophes into simpler apostrophes
     norm = norm.replace("’", "'")
+    # Lose soft hyphens (word wrap characters)
+    norm = norm.replace('\xad','')
     if len(norm) > 0 and not norm in vocab:
         norm = OOV_TERM
     return norm
@@ -38,7 +40,7 @@ class MetaSentence:
 
     def _tokenize(self):
         self._seq = []
-        for m in re.finditer(r'(\w|\’\w|\'\w)+', self.raw_sentence, re.UNICODE):
+        for m in re.finditer(r'(\w|\xad\w|\’\w|\'\w)+', self.raw_sentence, re.UNICODE):
             start, end = m.span()
             word = m.group()
             token = kaldi_normalize(word, self.vocab)
