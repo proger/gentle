@@ -1,7 +1,7 @@
 KALDI_BASE = kaldi/src/
 
 all:
-EXTRA_CXXFLAGS = -Wno-sign-compare
+EXTRA_CXXFLAGS = -Wno-sign-compare -Wno-unused-variable
 include $(KALDI_BASE)kaldi.mk
 
 BINFILES = k3 m3

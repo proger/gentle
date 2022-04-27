@@ -1,21 +1,29 @@
 // refactor of online2-wav-nnet3-latgen-faster.cc
 
-#include "online2/online-nnet3-decoding.h"
-#include "online2/online-nnet2-feature-pipeline.h"
-#include "online2/onlinebin-util.h"
-#include "online2/online-timing.h"
-#include "online2/online-endpoint.h"
+#include "base/kaldi-common.h"
 #include "fstext/fstext-lib.h"
-#include "lat/lattice-functions.h"
+#include "fstext/fstext-utils.h"
 #include "lat/lattice-functions-transition-model.h"
+#include "lat/lattice-functions.h"
+#include "lat/sausages.h"
 #include "lat/word-align-lattice.h"
+#include "lm/const-arpa-lm.h"
 #include "nnet3/decodable-simple-looped.h"
+#include "nnet3/nnet-utils.h"
+#include "online2/online-endpoint.h"
+#include "online2/online-feature-pipeline.h"
+#include "online2/online-nnet2-feature-pipeline.h"
+#include "online2/online-nnet3-decoding.h"
+#include "online2/online-timing.h"
+#include "online2/onlinebin-util.h"
+#include "util/parse-options.h"
+
 
 #ifdef HAVE_CUDA
 #include "cudamatrix/cu-device.h"
 #endif
 
-const int arate = 8000;
+const int arate = 16000;
 
 void ConfigFeatureInfo(kaldi::OnlineNnet2FeaturePipelineInfo& info,
                        std::string ivector_model_dir) {
@@ -24,41 +32,25 @@ void ConfigFeatureInfo(kaldi::OnlineNnet2FeaturePipelineInfo& info,
     info.feature_type = "mfcc";
     info.use_ivectors = true;
 
-    // ivector_extractor.conf
-    ReadKaldiObject(ivector_model_dir + "/final.mat",
-                    &info.ivector_extractor_info.lda_mat);
-    ReadKaldiObject(ivector_model_dir + "/global_cmvn.stats",
-                    &info.ivector_extractor_info.global_cmvn_stats);
-    ReadKaldiObject(ivector_model_dir + "/final.dubm",
-                    &info.ivector_extractor_info.diag_ubm);
-    ReadKaldiObject(ivector_model_dir + "/final.ie",
-                    &info.ivector_extractor_info.extractor);
+    kaldi::OnlineIvectorExtractionConfig ivector_extraction_opts;
+    ivector_extraction_opts.splice_config_rxfilename = ivector_model_dir + "/splice.conf";
+    ivector_extraction_opts.cmvn_config_rxfilename = ivector_model_dir + "/online_cmvn.conf";
+    ivector_extraction_opts.lda_mat_rxfilename = ivector_model_dir + "/final.mat";
+    ivector_extraction_opts.global_cmvn_stats_rxfilename = ivector_model_dir + "/global_cmvn.stats";
+    ivector_extraction_opts.diag_ubm_rxfilename = ivector_model_dir + "/final.dubm";
+    ivector_extraction_opts.ivector_extractor_rxfilename = ivector_model_dir + "/final.ie";
+    ivector_extraction_opts.max_count = 100;
 
-    info.ivector_extractor_info.num_gselect = 5;
-    info.ivector_extractor_info.min_post = 0.025;
-    info.ivector_extractor_info.posterior_scale = 0.1;
-    info.ivector_extractor_info.max_remembered_frames = 1000;
-    info.ivector_extractor_info.max_count = 100; // changed from 0.0 (?)
-
-    // XXX: Where do these come from?
-    info.ivector_extractor_info.greedy_ivector_extractor = true;
-    info.ivector_extractor_info.ivector_period = 10;
-    info.ivector_extractor_info.num_cg_iters = 15;
-    info.ivector_extractor_info.use_most_recent_ivector = true;
-
-    // splice.conf
-    info.ivector_extractor_info.splice_opts.left_context = 3;
-    info.ivector_extractor_info.splice_opts.right_context = 3;
+    info.ivector_extractor_info.Init(ivector_extraction_opts);
+    info.ivector_extractor_info.Check();
 
     // mfcc.conf
     info.mfcc_opts.frame_opts.samp_freq = arate;
     info.mfcc_opts.use_energy = false;
     info.mfcc_opts.num_ceps = 40;
     info.mfcc_opts.mel_opts.num_bins = 40;
-    info.mfcc_opts.mel_opts.low_freq = 40;
-    info.mfcc_opts.mel_opts.high_freq = -200;
-
-    info.ivector_extractor_info.Check();
+    info.mfcc_opts.mel_opts.low_freq = 20;
+    info.mfcc_opts.mel_opts.high_freq = -400;
 }
 
 void ConfigDecoding(kaldi::LatticeFasterDecoderConfig& config) {
@@ -68,7 +60,7 @@ void ConfigDecoding(kaldi::LatticeFasterDecoderConfig& config) {
 }
 
 void ConfigEndpoint(kaldi::OnlineEndpointConfig& config) {
-  config.silence_phones = "1:2:3:4:5:6:7:8:9:10:11:12:13:14:15:16:17:18:19:20";
+  config.silence_phones = "1:2:3:4:5";
 }
 void usage() {
   fprintf(stderr, "usage: k3 [nnet_dir hclg_path]\n");
@@ -128,10 +120,14 @@ int main(int argc, char *argv[]) {
       Input ki(nnet3_rxfilename, &binary);
       trans_model.Read(ki.Stream(), binary);
       am_nnet.Read(ki.Stream(), binary);
+      SetBatchnormTestMode(true, &(am_nnet.GetNnet()));
+      SetDropoutTestMode(true, &(am_nnet.GetNnet()));
+      nnet3::CollapseModel(nnet3::CollapseModelConfig(), &(am_nnet.GetNnet()));
     }
 
     nnet3::NnetSimpleLoopedComputationOptions nnet_simple_looped_opts;
     nnet_simple_looped_opts.acoustic_scale = 1.0; // changed from 0.1?
+    nnet_simple_looped_opts.frame_subsampling_factor = 3;
 
     nnet3::DecodableNnetSimpleLoopedInfo de_nnet_simple_looped_info(nnet_simple_looped_opts, &am_nnet);
 

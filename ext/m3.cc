@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 
-		int32 N = 3, P = 1;
+		int32 N = 2, P = 1;
 		float transition_scale = 1.0;
 		float self_loop_scale = 0.1;
 
