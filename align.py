@@ -49,7 +49,7 @@ if Path(transcript).exists():
     transcript = Path(transcript).read_text()
 
 resources = gentle.Resources()
-logging.info("converting audio to 8K sampled wav")
+logging.info("converting and resampling to wav")
 
 with gentle.resampled(args.audiofile) as wavfile:
     logging.info("starting alignment")

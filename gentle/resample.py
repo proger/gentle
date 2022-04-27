@@ -11,6 +11,8 @@ from .util.paths import get_binary
 FFMPEG = get_binary("ffmpeg")
 SOX = get_binary("sox")
 
+rate = '16000'
+
 def resample_ffmpeg(infile, outfile, offset=None, duration=None):
     '''
     Use FFMPEG to convert a media file to a wav file sampled at 8K
@@ -31,7 +33,7 @@ def resample_ffmpeg(infile, outfile, offset=None, duration=None):
     ] + offset + [
         '-i', infile,
     ] + duration + [
-        '-ac', '1', '-ar', '8000',
+        '-ac', '1', '-ar', rate,
         '-acodec', 'pcm_s16le',
         outfile
     ]
@@ -59,7 +61,7 @@ def resample_sox(infile, outfile, offset=None, duration=None):
         '-b', '16',
         '-c', '1',
         '-e', 'signed-integer',
-        '-r', '8000',
+        '-r', rate,
         '-L',
         outfile
     ] + trim
