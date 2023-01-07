@@ -42,7 +42,7 @@ class Word:
         return not self == other
 
     def __repr__(self):
-        return "Word(" + " ".join(sorted([key + "=" + str(val) for key, val in self.as_dict(without="phones").items()])) + ")"
+        return "Word(" + " ".join(sorted([key + "=" + str(val) for key, val in self.as_dict().items()])) + ")"
 
     def shift(self, time=None, offset=None):
         if self.start is not None and time is not None:
