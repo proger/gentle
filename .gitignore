@@ -10,6 +10,5 @@ ext/.depend.mk
 *~
 webdata/
 gentle.egg-info/
-exp/
 ext/k3
 ext/m3
