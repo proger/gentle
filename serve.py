@@ -33,7 +33,8 @@ class Transcriber():
         self.ntranscriptionthreads = ntranscriptionthreads
         self.resources = gentle.Resources()
 
-        self.full_transcriber = gentle.FullTranscriber(self.resources, nthreads=ntranscriptionthreads)
+        #self.full_transcriber = gentle.FullTranscriber(self.resources, nthreads=ntranscriptionthreads)
+        self.full_transcriber = None
         self._status_dicts = {}
 
     def get_status(self, uid):
