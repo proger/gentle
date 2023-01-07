@@ -17,7 +17,6 @@ parser.add_argument(
 parser.add_argument(
         '--conservative', dest='conservative', action='store_true',
         help='conservative alignment')
-parser.set_defaults(conservative=False)
 parser.add_argument(
         '--disfluency', dest='disfluency', action='store_true',
         help='include disfluencies (uh, um) in alignment')
