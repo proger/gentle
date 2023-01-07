@@ -7,8 +7,6 @@ from .util.paths import get_binary
 EXECUTABLE_PATH = get_binary("ext/k3")
 logger = logging.getLogger(__name__)
 
-STDERR = subprocess.DEVNULL
-
 class Kaldi:
     def __init__(self, nnet_dir=None, hclg_path=None, proto_langdir=None):
         cmd = [EXECUTABLE_PATH]
@@ -20,8 +18,7 @@ class Kaldi:
         if not os.path.exists(hclg_path):
             logger.error('hclg_path does not exist: %s', hclg_path)
         self._p = subprocess.Popen(cmd,
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   stderr=STDERR, bufsize=0)
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
         self.finished = False
 
     def _cmd(self, c):
