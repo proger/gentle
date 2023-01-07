@@ -1,0 +1,1 @@
+/home/proger/semesyuk/exp/pryhody-lang/lang/words.txt
