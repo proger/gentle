@@ -121,12 +121,12 @@ html, body {
   </head>
   <body>
     <div id="header">
-      <h1 class="home"><a href="/">Gentle</a></h1>
+      <h1 class="home"><a id=wordtimestamp>00:00</a></h1>
       <audio id="audio" src="a.wav" controls="true"></audio>
       <img src="/preloader.gif" id="preloader" alt="loading...">
       <span id="downloads"> </div>
     </div>
-    <div id="transcript"></div>
+    <div id="transcript" contenteditable=true></div>
     <div id="footer">
         Акустичний швайнокарась | <a href="https://lowerquality.com/gentle">Gentle</a> is free software released under the <a href="https://opensource.org/licenses/MIT">MIT license</a>. <a href="https://lowerquality.com/gentle">Homepage</a> | <a href="https://github.com/proger/gentle-uk">Source code</a>.
     </div>
@@ -285,6 +285,7 @@ function render(ret) {
         $wd.onclick = function() {
             if(wd.start !== undefined) {
                 console.log(wd.start);
+                document.getElementById('wordtimestamp').innerText = `${wd.start}`;
                 $a.currentTime = wd.start;
                 $a.play();
             }
