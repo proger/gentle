@@ -8,13 +8,13 @@ setup(
         'argv_emulation': False,
         'resources': 'k3,m3,ffmpeg,www,exp'
     }},
-    name='gentle',
+    name='gentle-uk',
     version=__version__,
-    description='Robust yet lenient forced-aligner built on Kaldi.',
+    description='Robust yet lenient forced-aligner for Ukrainian built on Kaldi.',
     url='http://lowerquality.com/gentle',
     author='Robert M Ochshorn',
     license='MIT',
     packages=['gentle'],
-    install_requires=['twisted'],
+    install_requires=['twisted', 'uk'],
     test_suite='tests',
 )

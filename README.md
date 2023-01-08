@@ -1,5 +1,5 @@
-# Gentle
-**Robust yet lenient forced-aligner built on Kaldi. A tool for aligning speech with text.**
+# Gentle-uk
+**Robust yet lenient forced-aligner built on Kaldi for Ukrainian. A tool for aligning speech with text.**
 
 ## Getting Started
 
@@ -23,8 +23,10 @@ curl -F "audio=@audio.mp3" -F "transcript=@words.txt" "http://localhost:8765/tra
 
 If you've downloaded the source code you can also run the aligner as a command line program:
 
+Install https://github.com/proger/uk first.
+
 ```bash
-git clone https://github.com/lowerquality/gentle.git
+git clone https://github.com/proger/gentle-uk.git
 cd gentle
 ./install.sh
 python3 align.py audio.mp3 words.txt
