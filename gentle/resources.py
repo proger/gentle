@@ -20,6 +20,3 @@ class Resources():
 
         require_dir(self.proto_langdir)
         require_dir(self.nnet_gpu_path)
-
-        with open(os.path.join(self.proto_langdir, "langdir", "words.txt")) as fh:
-            self.vocab = metasentence.load_vocabulary(fh)
