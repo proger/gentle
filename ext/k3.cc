@@ -63,7 +63,7 @@ void ConfigEndpoint(kaldi::OnlineEndpointConfig& config) {
   config.silence_phones = "1:2:3:4:5";
 }
 void usage() {
-  fprintf(stderr, "usage: k3 [nnet_dir hclg_path]\n");
+  fprintf(stderr, "usage: k3 nnet_dir langdir hclg_path\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -72,16 +72,16 @@ int main(int argc, char *argv[]) {
 
     setbuf(stdout, NULL);
 
-    std::string nnet_dir = "exp/tdnn_7b_chain_online";
-    std::string graph_dir = nnet_dir + "/graph_pp";
-    std::string fst_rxfilename = graph_dir + "/HCLG.fst";
+    std::string nnet_dir = "exp/chain";
+    std::string langdir = "exp/langdir";
+    std::string fst_rxfilename = "exp/chain/graph_pp/HCLG.fst";
 
-    if(argc == 3) {
+    if(argc == 4) {
       nnet_dir = argv[1];
-      graph_dir = nnet_dir + "/graph_pp";
-      fst_rxfilename = argv[2];
+      langdir = argv[2];
+      fst_rxfilename = argv[3];
     }
-    else if(argc != 1) {
+    else {
       usage();
       return EXIT_FAILURE;
     }
@@ -96,9 +96,9 @@ int main(int argc, char *argv[]) {
     const std::string ivector_model_dir = nnet_dir + "/ivector_extractor";
     const std::string nnet3_rxfilename = nnet_dir + "/final.mdl";
 
-    const std::string word_syms_rxfilename = graph_dir + "/words.txt";
-    const string word_boundary_filename = graph_dir + "/phones/word_boundary.int";
-    const string phone_syms_rxfilename = graph_dir + "/phones.txt";
+    const std::string word_syms_rxfilename = langdir + "/words.txt";
+    const string word_boundary_filename = langdir + "/phones/word_boundary.int";
+    const string phone_syms_rxfilename = langdir + "/phones.txt";
 
     WordBoundaryInfoNewOpts opts; // use default opts
     WordBoundaryInfo word_boundary_info(opts, word_boundary_filename);

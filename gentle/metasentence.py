@@ -20,8 +20,11 @@ def kaldi_normalize(word, vocab):
     norm = norm.replace("’", "'")
     # Lose soft hyphens (word wrap characters)
     norm = norm.replace('\xad','')
-    if len(norm) > 0 and not norm in vocab:
-        norm = OOV_TERM
+    if vocab is not None:
+        if len(norm) > 0 and not norm in vocab:
+            norm = OOV_TERM
+    if re.match(r'^[0-9]+$', norm):
+        norm = '<unk>'
     return norm
 
 class MetaSentence:

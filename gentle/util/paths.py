@@ -52,3 +52,9 @@ def get_resource(path):
 
 def get_datadir(path):
     return RESOLVER.get_datadir(path)
+
+def hash_string(*x):
+    x = ' '.join(x)
+    import hashlib
+    return hashlib.sha256(x.encode('utf-8')).hexdigest()[:10]
+

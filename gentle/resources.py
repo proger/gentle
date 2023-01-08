@@ -1,4 +1,3 @@
-import logging
 import os
 
 from .util.paths import get_resource, ENV_VAR
@@ -24,5 +23,3 @@ class Resources():
 
         with open(os.path.join(self.proto_langdir, "langdir", "words.txt")) as fh:
             self.vocab = metasentence.load_vocabulary(fh)
-
-

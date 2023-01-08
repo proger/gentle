@@ -35,9 +35,9 @@ int main(int argc, char *argv[]) {
 		std::string lang_fst_filename = proto_dir + "/langdir/L.fst",
 			lang_disambig_fst_filename = proto_dir + "/langdir/L_disambig.fst",
 			disambig_phones_filename = proto_dir + "/langdir/phones/disambig.int",
-			model_filename = proto_dir + "/tdnn_7b_chain_online/final.mdl",
-			tree_filename = proto_dir + "/tdnn_7b_chain_online/tree",
-			words_filename = proto_dir + "/tdnn_7b_chain_online/graph_pp/words.txt";
+			model_filename = proto_dir + "/chain/final.mdl",
+			tree_filename = proto_dir + "/chain/tree",
+			words_filename = proto_dir + "/langdir/words.txt";
 
 		if (!std::ifstream(lang_fst_filename.c_str())) {
 			std::cerr << "expected " << lang_fst_filename << " to exist" << std::endl;

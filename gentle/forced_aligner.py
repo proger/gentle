@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from gentle import diff_align
 from gentle import kaldi_queue
 from gentle import language_model
@@ -5,6 +7,11 @@ from gentle import metasentence
 from gentle import multipass
 from gentle.transcriber import MultiThreadedTranscriber
 from gentle.transcription import Transcription
+from gentle.util.paths import hash_string
+
+from uk.prepare_lang import extend_dict
+from uk.subprocess import sh
+
 
 class ForcedAligner():
 
@@ -13,10 +20,24 @@ class ForcedAligner():
         self.nthreads = nthreads
         self.transcript = transcript
         self.resources = resources
-        self.ms = metasentence.MetaSentence(transcript, resources.vocab)
+        self.ms = metasentence.MetaSentence(transcript, None)
         ks = self.ms.get_kaldi_sequence()
-        gen_hclg_filename = language_model.make_bigram_language_model(ks, resources.proto_langdir, **kwargs)
-        self.queue = kaldi_queue.build(resources, hclg_path=gen_hclg_filename, nthreads=nthreads)
+            
+        exp = self.exp = Path(resources.proto_langdir) / hash_string(transcript)
+        (exp / 'dict').mkdir(exist_ok=True, parents=True)
+        try:
+            (exp / 'chain').symlink_to(resources.nnet_gpu_path)
+        except FileExistsError:
+            pass
+
+        corpus_txt = exp / 'corpus.txt'
+        corpus_txt.write_text(' '.join(ks))
+        extend_dict(ks, exp / 'dict', source_dict_dir=Path(resources.proto_langdir) / 'dict')
+
+        sh('utils/prepare_lang.sh', exp / 'dict', "<unk>", exp / 'lang_tmp', exp / 'langdir')
+
+        gen_hclg_filename = language_model.make_bigram_language_model(ks, exp, **kwargs)
+        self.queue = kaldi_queue.build(self.exp, hclg_path=gen_hclg_filename, nthreads=nthreads)
         self.mtt = MultiThreadedTranscriber(self.queue, nthreads=nthreads)
 
     def transcribe(self, wavfile, progress_cb=None, logging=None):
@@ -37,7 +58,7 @@ class ForcedAligner():
         if progress_cb is not None:
             progress_cb({'status': 'ALIGNING'})
 
-        words = multipass.realign(wavfile, words, self.ms, resources=self.resources, nthreads=self.nthreads, progress_cb=progress_cb)
+        words = multipass.realign(wavfile, words, self.ms, exp=self.exp, nthreads=self.nthreads, progress_cb=progress_cb)
 
         if logging is not None:
             logging.info("after 2nd pass: %d unaligned words (of %d)" % (len([X for X in words if X.not_found_in_audio()]), len(words)))

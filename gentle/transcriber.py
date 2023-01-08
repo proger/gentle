@@ -7,7 +7,7 @@ from gentle import transcription
 from multiprocessing.pool import ThreadPool as Pool
 
 class MultiThreadedTranscriber:
-    def __init__(self, kaldi_queue, chunk_len=20, overlap_t=2, nthreads=4):
+    def __init__(self, kaldi_queue, chunk_len=30, overlap_t=2, nthreads=4):
         self.chunk_len = chunk_len
         self.overlap_t = overlap_t
         self.nthreads = nthreads

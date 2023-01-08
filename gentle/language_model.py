@@ -1,12 +1,10 @@
-import logging
 import math
-import os
-import shutil
+from pathlib import Path
 import subprocess
 import sys
-import tempfile
 
-from .util.paths import get_binary
+
+from .util.paths import get_binary, hash_string
 from .metasentence import MetaSentence
 from .resources import Resources
 
@@ -36,8 +34,12 @@ def make_bigram_lm_fst(word_sequences, **kwargs):
     disfluency = kwargs['disfluency'] if 'disfluency' in kwargs else False
     disfluencies = kwargs['disfluencies'] if 'disfluencies' in kwargs else []
 
-    bigrams = {OOV_TERM: set([OOV_TERM])}
+    # yolo
+    disfluency = True
+    disfluencies = [OOV_TERM]
 
+    bigrams = {OOV_TERM: set([OOV_TERM])}
+    
     for word_sequence in word_sequences:
         if len(word_sequence) == 0:
             continue
@@ -92,41 +94,31 @@ def make_bigram_lm_fst(word_sequences, **kwargs):
 
     output += "%d    0\n" % (len(node_ids))
 
-    return output.encode()
+    return output
 
-def make_bigram_language_model(kaldi_seq, proto_langdir, **kwargs):
+def make_bigram_language_model(kaldi_seq, exp, **kwargs):
     """Generates a language model to fit the text.
 
     Returns the filename of the generated language model FST.
     The caller is resposible for removing the generated file.
 
-    `proto_langdir` is a path to a directory containing prototype model data
+    `exp` is a path to a directory containing prototype model data
     `kaldi_seq` is a list of words within kaldi's vocabulary.
     """
 
+    graph = exp / 'graph' / hash_string(*kaldi_seq)
+    graph.mkdir(parents=True, exist_ok=True)
+
     # Generate a textual FST
     txt_fst = make_bigram_lm_fst(kaldi_seq, **kwargs)
-    txt_fst_file = tempfile.NamedTemporaryFile(delete=False)
-    txt_fst_file.write(txt_fst)
-    txt_fst_file.close()
+    txt_fst_file = graph / 'lm.txt'
+    txt_fst_file.write_text(txt_fst)
 
-    hclg_filename = tempfile.mktemp(suffix='_HCLG.fst')
-    try:
-        subprocess.check_output([MKGRAPH_PATH,
-                        proto_langdir,
-                        txt_fst_file.name,
-                        hclg_filename])
-    except Exception as e:
-        try:
-            os.unlink(hclg_filename)
-        except:
-            pass
-        raise e
-    finally:
-        os.unlink(txt_fst_file.name)
+    hclg_filename = graph / 'HCLG.fst'
+    subprocess.check_output([MKGRAPH_PATH, exp, txt_fst_file, hclg_filename])
 
     return hclg_filename
 
 if __name__=='__main__':
     import sys
-    make_bigram_language_model(open(sys.argv[1]).read(), Resources().proto_langdir)
+    make_bigram_language_model(open(sys.argv[1]).read(), Path(Resources().proto_langdir))

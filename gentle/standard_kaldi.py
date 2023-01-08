@@ -8,12 +8,12 @@ EXECUTABLE_PATH = get_binary("ext/k3")
 logger = logging.getLogger(__name__)
 
 class Kaldi:
-    def __init__(self, nnet_dir=None, hclg_path=None, proto_langdir=None):
+    def __init__(self, exp, hclg_path):
         cmd = [EXECUTABLE_PATH]
         
-        if nnet_dir is not None:
-            cmd.append(nnet_dir)
-            cmd.append(hclg_path)
+        cmd.append(str(exp / 'chain'))
+        cmd.append(str(exp / 'langdir'))
+        cmd.append(str(hclg_path))
 
         if not os.path.exists(hclg_path):
             logger.error('hclg_path does not exist: %s', hclg_path)
@@ -72,20 +72,3 @@ class Kaldi:
 
     def __del__(self):
         self.stop()
-
-if __name__=='__main__':
-    import numm3
-    import sys
-
-    infile = sys.argv[1]
-    
-    k = Kaldi()
-
-    buf = numm3.sound2np(infile, nchannels=1, R=8000)
-    print('loaded_buf', len(buf))
-    
-    idx=0
-    while idx < len(buf):
-        k.push_chunk(buf[idx:idx+160000].tostring())
-        print(k.get_final())
-        idx += 160000
