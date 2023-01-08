@@ -9,6 +9,7 @@ ext/.depend.mk
 *.swp
 *~
 webdata/
-gentle.egg-info/
+gentle_uk.egg-info/
 ext/k3
 ext/m3
+exp/
