@@ -34,7 +34,7 @@ class ForcedAligner():
         corpus_txt.write_text(' '.join(ks))
         extend_dict(ks, exp / 'dict', source_dict_dir=Path(resources.proto_langdir) / 'dict')
 
-        sh('utils/prepare_lang.sh', exp / 'dict', "<unk>", exp / 'lang_tmp', exp / 'langdir')
+        sh('utils/prepare_lang.sh', '--unk-fst', 'exp/unk/unk_fst.txt', exp / 'dict', "<unk>", exp / 'lang_tmp', exp / 'langdir')
 
         gen_hclg_filename = language_model.make_bigram_language_model(ks, exp, **kwargs)
         self.queue = kaldi_queue.build(self.exp, hclg_path=gen_hclg_filename, nthreads=nthreads)
@@ -54,6 +54,9 @@ class ForcedAligner():
         # Perform a second-pass with unaligned words
         if logging is not None:
             logging.info("%d unaligned words (of %d)" % (len([X for X in words if X.not_found_in_audio()]), len(words)))
+
+
+        return Transcription(words=words, transcript=self.transcript)
 
         if progress_cb is not None:
             progress_cb({'status': 'ALIGNING'})

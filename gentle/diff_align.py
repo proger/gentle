@@ -1,13 +1,9 @@
 import difflib
 import json
-import os
 import sys
 
 from gentle import metasentence
-from gentle import language_model
-from gentle import standard_kaldi
 from gentle import transcription
-from gentle.resources import Resources
 
 
 # TODO(maxhawkins): try using the (apparently-superior) time-mediated dynamic
@@ -35,7 +31,8 @@ def align(alignment, ms, **kwargs):
 
         if op == 'delete':
             word = hypothesis[a]
-            if disfluency and word in disfluencies:
+            #if disfluency and word in disfluencies:
+            if True:
                 hyp_token = alignment[a]
                 phones = hyp_token.phones or []
 
@@ -109,7 +106,7 @@ if __name__=='__main__':
     JSON_FILE = sys.argv[2]
     OUTPUT_FILE = sys.argv[3]
 
-    ms = metasentence.MetaSentence(open(TEXT_FILE).read(), Resources().vocab)
+    ms = metasentence.MetaSentence(open(TEXT_FILE).read(), None)
     alignment = json.load(open(JSON_FILE))['words']
 
     out = align(alignment, ms)

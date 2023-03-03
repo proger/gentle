@@ -57,6 +57,8 @@ class Kaldi:
                 words[-1]['phones'].append(ph)
 
         self._reset()
+
+        print('words', [word['word'] for word in words])
         return words
 
     def _reset(self):
